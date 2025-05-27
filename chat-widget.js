@@ -718,10 +718,7 @@
         userRegistration.classList.add('active');
     }
 
-    // Validate email format
-    function isValidEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
+   
     }
        // Validate phone format
     function isValidPhone(phone) {
