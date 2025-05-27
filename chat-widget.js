@@ -625,7 +625,7 @@
                 </div>
                 <div class="form-field">
                     <label class="form-label" for="chat-user-phone">WhatsApp</label>
-                    <input type="email" id="chat-user-email" class="form-input" placeholder="(+Country Code)-Your WhatsApp Number " required>
+                    <input type="phone" id="chat-user-phone" class="form-input" placeholder="(+Country Code)-Your WhatsApp Number " required>
                     <div class="error-text" id="phone-error"></div>
                 </div>
                 <button type="submit" class="submit-registration">Continue to Chat</button>
@@ -723,6 +723,12 @@
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
     }
+       // Validate phone format
+    function isValidEmail(phone) {
+        const phoneRegex = /^62[0-9]{8,13}$/;
+        return phoneRegex.test(phone);
+    }
+
 
     // Handle registration form submission
     async function handleRegistration(event) {
