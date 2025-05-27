@@ -724,7 +724,7 @@
         return emailRegex.test(email);
     }
        // Validate phone format
-    function isValidEmail(phone) {
+    function isValidPhone(phone) {
         const phoneRegex = /^62[0-9]{8,13}$/;
         return phoneRegex.test(phone);
     }
