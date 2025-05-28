@@ -1,6 +1,5 @@
 // Interactive Chat Widget for n8n
 (function() {
-    // Initialize widget only once
     if (window.N8nChatWidgetLoaded) return;
     window.N8nChatWidgetLoaded = true;
 
@@ -32,7 +31,6 @@
             --chat-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-family: 'Poppins', sans-serif;
         }
-
         .chat-assist-widget .chat-window {
             position: fixed;
             bottom: 90px;
@@ -50,21 +48,13 @@
             opacity: 0;
             transform: translateY(20px) scale(0.95);
         }
-
-        .chat-assist-widget .chat-window.right-side {
-            right: 20px;
-        }
-
-        .chat-assist-widget .chat-window.left-side {
-            left: 20px;
-        }
-
+        .chat-assist-widget .chat-window.right-side { right: 20px; }
+        .chat-assist-widget .chat-window.left-side { left: 20px; }
         .chat-assist-widget .chat-window.visible {
             display: flex;
             opacity: 1;
             transform: translateY(0) scale(1);
         }
-
         .chat-assist-widget .chat-header {
             padding: 16px;
             display: flex;
@@ -74,7 +64,6 @@
             color: white;
             position: relative;
         }
-
         .chat-assist-widget .chat-header-logo {
             width: 32px;
             height: 32px;
@@ -83,19 +72,17 @@
             background: white;
             padding: 4px;
         }
-
         .chat-assist-widget .chat-header-title {
             font-size: 16px;
             font-weight: 600;
             color: white;
         }
-
         .chat-assist-widget .chat-close-btn {
             position: absolute;
             right: 16px;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255,255,255,0.2);
             border: none;
             color: white;
             cursor: pointer;
@@ -109,12 +96,10 @@
             width: 28px;
             height: 28px;
         }
-
         .chat-assist-widget .chat-close-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255,255,255,0.3);
             transform: translateY(-50%) scale(1.1);
         }
-
         .chat-assist-widget .chat-welcome {
             position: absolute;
             top: 50%;
@@ -125,7 +110,6 @@
             width: 100%;
             max-width: 320px;
         }
-
         .chat-assist-widget .chat-welcome-title {
             font-size: 22px;
             font-weight: 700;
@@ -133,7 +117,6 @@
             margin-bottom: 24px;
             line-height: 1.3;
         }
-
         .chat-assist-widget .chat-start-btn {
             display: flex;
             align-items: center;
@@ -153,28 +136,21 @@
             margin-bottom: 16px;
             box-shadow: var(--chat-shadow-md);
         }
-
         .chat-assist-widget .chat-start-btn:hover {
             transform: translateY(-2px);
             box-shadow: var(--chat-shadow-lg);
         }
-
         .chat-assist-widget .chat-response-time {
             font-size: 14px;
             color: var(--chat-color-text-light);
             margin: 0;
         }
-
         .chat-assist-widget .chat-body {
             display: none;
             flex-direction: column;
             height: 100%;
         }
-
-        .chat-assist-widget .chat-body.active {
-            display: flex;
-        }
-
+        .chat-assist-widget .chat-body.active { display: flex; }
         .chat-assist-widget .chat-messages {
             flex: 1;
             overflow-y: auto;
@@ -184,20 +160,12 @@
             flex-direction: column;
             gap: 12px;
         }
-
-        .chat-assist-widget .chat-messages::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .chat-assist-widget .chat-messages::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
+        .chat-assist-widget .chat-messages::-webkit-scrollbar { width: 6px; }
+        .chat-assist-widget .chat-messages::-webkit-scrollbar-track { background: transparent; }
         .chat-assist-widget .chat-messages::-webkit-scrollbar-thumb {
-            background-color: rgba(16, 185, 129, 0.3);
+            background-color: rgba(16,185,129,0.3);
             border-radius: var(--chat-radius-full);
         }
-
         .chat-assist-widget .chat-bubble {
             padding: 14px 18px;
             border-radius: var(--chat-radius-md);
@@ -206,9 +174,8 @@
             font-size: 14px;
             line-height: 1.6;
             position: relative;
-            white-space: pre-line; /* This preserves line breaks */
+            white-space: pre-line;
         }
-
         .chat-assist-widget .chat-bubble.user-bubble {
             background: linear-gradient(135deg, var(--chat-color-primary) 0%, var(--chat-color-secondary) 100%);
             color: white;
@@ -216,7 +183,6 @@
             border-bottom-right-radius: 4px;
             box-shadow: var(--chat-shadow-sm);
         }
-
         .chat-assist-widget .chat-bubble.bot-bubble {
             background: white;
             color: var(--chat-color-text);
@@ -225,7 +191,6 @@
             box-shadow: var(--chat-shadow-sm);
             border: 1px solid var(--chat-color-light);
         }
-
         /* Typing animation */
         .chat-assist-widget .typing-indicator {
             display: flex;
@@ -240,7 +205,6 @@
             box-shadow: var(--chat-shadow-sm);
             border: 1px solid var(--chat-color-light);
         }
-
         .chat-assist-widget .typing-dot {
             width: 8px;
             height: 8px;
@@ -249,28 +213,13 @@
             opacity: 0.7;
             animation: typingAnimation 1.4s infinite ease-in-out;
         }
-
-        .chat-assist-widget .typing-dot:nth-child(1) {
-            animation-delay: 0s;
-        }
-
-        .chat-assist-widget .typing-dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .chat-assist-widget .typing-dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
+        .chat-assist-widget .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .chat-assist-widget .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .chat-assist-widget .typing-dot:nth-child(3) { animation-delay: 0.4s; }
         @keyframes typingAnimation {
-            0%, 60%, 100% {
-                transform: translateY(0);
-            }
-            30% {
-                transform: translateY(-4px);
-            }
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
         }
-
         .chat-assist-widget .chat-controls {
             padding: 16px;
             background: var(--chat-color-surface);
@@ -278,7 +227,6 @@
             display: flex;
             gap: 10px;
         }
-
         .chat-assist-widget .chat-textarea {
             flex: 1;
             padding: 14px 16px;
@@ -294,17 +242,12 @@
             min-height: 48px;
             transition: var(--chat-transition);
         }
-
         .chat-assist-widget .chat-textarea:focus {
             outline: none;
             border-color: var(--chat-color-primary);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+            box-shadow: 0 0 0 3px rgba(16,185,129,0.2);
         }
-
-        .chat-assist-widget .chat-textarea::placeholder {
-            color: var(--chat-color-text-light);
-        }
-
+        .chat-assist-widget .chat-textarea::placeholder { color: var(--chat-color-text-light); }
         .chat-assist-widget .chat-submit {
             background: linear-gradient(135deg, var(--chat-color-primary) 0%, var(--chat-color-secondary) 100%);
             color: white;
@@ -320,17 +263,11 @@
             flex-shrink: 0;
             box-shadow: var(--chat-shadow-sm);
         }
-
         .chat-assist-widget .chat-submit:hover {
             transform: scale(1.05);
             box-shadow: var(--chat-shadow-md);
         }
-
-        .chat-assist-widget .chat-submit svg {
-            width: 22px;
-            height: 22px;
-        }
-
+        .chat-assist-widget .chat-submit svg { width: 22px; height: 22px; }
         .chat-assist-widget .chat-launcher {
             position: fixed;
             bottom: 20px;
@@ -348,38 +285,24 @@
             padding: 0 20px 0 16px;
             gap: 8px;
         }
-
-        .chat-assist-widget .chat-launcher.right-side {
-            right: 20px;
-        }
-
-        .chat-assist-widget .chat-launcher.left-side {
-            left: 20px;
-        }
-
+        .chat-assist-widget .chat-launcher.right-side { right: 20px; }
+        .chat-assist-widget .chat-launcher.left-side { left: 20px; }
         .chat-assist-widget .chat-launcher:hover {
             transform: scale(1.05);
             box-shadow: var(--chat-shadow-lg);
         }
-
-        .chat-assist-widget .chat-launcher svg {
-            width: 24px;
-            height: 24px;
-        }
-        
+        .chat-assist-widget .chat-launcher svg { width: 24px; height: 24px; }
         .chat-assist-widget .chat-launcher-text {
             font-weight: 600;
             font-size: 15px;
             white-space: nowrap;
         }
-
         .chat-assist-widget .chat-footer {
             padding: 10px;
             text-align: center;
             background: var(--chat-color-surface);
             border-top: 1px solid var(--chat-color-light);
         }
-
         .chat-assist-widget .chat-footer-link {
             color: var(--chat-color-primary);
             text-decoration: none;
@@ -388,11 +311,7 @@
             transition: var(--chat-transition);
             font-family: inherit;
         }
-
-        .chat-assist-widget .chat-footer-link:hover {
-            opacity: 1;
-        }
-
+        .chat-assist-widget .chat-footer-link:hover { opacity: 1; }
         .chat-assist-widget .suggested-questions {
             display: flex;
             flex-direction: column;
@@ -401,7 +320,6 @@
             align-self: flex-start;
             max-width: 85%;
         }
-
         .chat-assist-widget .suggested-question-btn {
             background: #f3f4f6;
             border: 1px solid var(--chat-color-light);
@@ -415,24 +333,20 @@
             font-family: inherit;
             line-height: 1.4;
         }
-
         .chat-assist-widget .suggested-question-btn:hover {
             background: var(--chat-color-light);
             border-color: var(--chat-color-primary);
         }
-
         .chat-assist-widget .chat-link {
             color: var(--chat-color-primary);
             text-decoration: underline;
             word-break: break-all;
             transition: var(--chat-transition);
         }
-
         .chat-assist-widget .chat-link:hover {
             color: var(--chat-color-secondary);
             text-decoration: underline;
         }
-
         .chat-assist-widget .user-registration {
             position: absolute;
             top: 50%;
@@ -444,11 +358,7 @@
             max-width: 320px;
             display: none;
         }
-
-        .chat-assist-widget .user-registration.active {
-            display: block;
-        }
-
+        .chat-assist-widget .user-registration.active { display: block; }
         .chat-assist-widget .registration-title {
             font-size: 18px;
             font-weight: 600;
@@ -456,27 +366,23 @@
             margin-bottom: 16px;
             line-height: 1.3;
         }
-
         .chat-assist-widget .registration-form {
             display: flex;
             flex-direction: column;
             gap: 12px;
             margin-bottom: 16px;
         }
-
         .chat-assist-widget .form-field {
             display: flex;
             flex-direction: column;
             gap: 4px;
             text-align: left;
         }
-
         .chat-assist-widget .form-label {
             font-size: 14px;
             font-weight: 500;
             color: var(--chat-color-text);
         }
-
         .chat-assist-widget .form-input {
             padding: 12px 14px;
             border: 1px solid var(--chat-color-border);
@@ -485,23 +391,17 @@
             font-size: 14px;
             transition: var(--chat-transition);
         }
-
         .chat-assist-widget .form-input:focus {
             outline: none;
             border-color: var(--chat-color-primary);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+            box-shadow: 0 0 0 3px rgba(16,185,129,0.2);
         }
-
-        .chat-assist-widget .form-input.error {
-            border-color: #ef4444;
-        }
-
+        .chat-assist-widget .form-input.error { border-color: #ef4444; }
         .chat-assist-widget .error-text {
             font-size: 12px;
             color: #ef4444;
             margin-top: 2px;
         }
-
         .chat-assist-widget .submit-registration {
             display: flex;
             align-items: center;
@@ -519,17 +419,33 @@
             font-family: inherit;
             box-shadow: var(--chat-shadow-md);
         }
-
         .chat-assist-widget .submit-registration:hover {
             transform: translateY(-2px);
             box-shadow: var(--chat-shadow-lg);
         }
-
         .chat-assist-widget .submit-registration:disabled {
             opacity: 0.7;
             cursor: not-allowed;
             transform: none;
         }
+    `;
+    document.head.appendChild(widgetStyles);
+    // Interactive Chat Widget for n8n
+(function() {
+    // Initialize widget only once
+    if (window.N8nChatWidgetLoaded) return;
+    window.N8nChatWidgetLoaded = true;
+
+    // Load font resource - using Poppins for a fresh look
+    const fontElement = document.createElement('link');
+    fontElement.rel = 'stylesheet';
+    fontElement.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap';
+    document.head.appendChild(fontElement);
+
+    // Apply widget styles with completely different design approach
+    const widgetStyles = document.createElement('style');
+    widgetStyles.textContent = `
+        /* ...[CSS omitted for brevity, unchanged]... */
     `;
     document.head.appendChild(widgetStyles);
 
@@ -623,6 +539,11 @@
                     <input type="email" id="chat-user-email" class="form-input" placeholder="Your email address" required>
                     <div class="error-text" id="email-error"></div>
                 </div>
+                <div class="form-field">
+                    <label class="form-label" for="chat-user-whatsapp">WhatsApp Number</label>
+                    <input type="text" id="chat-user-whatsapp" class="form-input" placeholder="Nomor WhatsApp Anda" required>
+                    <div class="error-text" id="whatsapp-error"></div>
+                </div>
                 <button type="submit" class="submit-registration">Continue to Chat</button>
             </form>
         </div>
@@ -654,7 +575,7 @@
     launchButton.className = `chat-launcher ${settings.style.position === 'left' ? 'left-side' : 'right-side'}`;
     launchButton.innerHTML = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"></path>
         </svg>
         <span class="chat-launcher-text">Need help?</span>`;
     
@@ -678,6 +599,9 @@
     const emailInput = chatWindow.querySelector('#chat-user-email');
     const nameError = chatWindow.querySelector('#name-error');
     const emailError = chatWindow.querySelector('#email-error');
+    // Tambahan untuk WhatsApp
+    const whatsappInput = chatWindow.querySelector('#chat-user-whatsapp');
+    const whatsappError = chatWindow.querySelector('#whatsapp-error');
 
     // Helper function to generate unique session ID
     function createSessionId() {
@@ -719,6 +643,12 @@
         return emailRegex.test(email);
     }
 
+    // Validasi WhatsApp sederhana (nomor saja, bisa disesuaikan regex-nya)
+    function isValidWhatsappNumber(number) {
+        // Cek nomor, bisa dimulai dengan + atau angka, panjang 10-15 digit
+        return /^(\+?\d{10,15})$/.test(number);
+    }
+
     // Handle registration form submission
     async function handleRegistration(event) {
         event.preventDefault();
@@ -726,12 +656,15 @@
         // Reset error messages
         nameError.textContent = '';
         emailError.textContent = '';
+        whatsappError.textContent = '';
         nameInput.classList.remove('error');
         emailInput.classList.remove('error');
+        whatsappInput.classList.remove('error');
         
         // Get values
         const name = nameInput.value.trim();
         const email = emailInput.value.trim();
+        const whatsapp = whatsappInput.value.trim();
         
         // Validate
         let isValid = true;
@@ -751,6 +684,17 @@
             emailInput.classList.add('error');
             isValid = false;
         }
+
+        // Validasi WhatsApp number
+        if (!whatsapp) {
+            whatsappError.textContent = 'Silakan masukkan nomor WhatsApp Anda';
+            whatsappInput.classList.add('error');
+            isValid = false;
+        } else if (!isValidWhatsappNumber(whatsapp)) {
+            whatsappError.textContent = 'Nomor WhatsApp tidak valid';
+            whatsappInput.classList.add('error');
+            isValid = false;
+        }
         
         if (!isValid) return;
         
@@ -764,7 +708,8 @@
             route: settings.webhook.route,
             metadata: {
                 userId: email,
-                userName: name
+                userName: name,
+                userWhatsapp: whatsapp
             }
         }];
 
@@ -789,7 +734,7 @@
             const sessionResponseData = await sessionResponse.json();
             
             // Send user info as first message
-            const userInfoMessage = `Name: ${name}\nEmail: ${email}`;
+            const userInfoMessage = `Name: ${name}\nEmail: ${email}\nWhatsApp: ${whatsapp}`;
             
             const userInfoData = {
                 action: "sendMessage",
@@ -799,6 +744,7 @@
                 metadata: {
                     userId: email,
                     userName: name,
+                    userWhatsapp: whatsapp,
                     isUserInfo: true
                 }
             };
@@ -873,8 +819,9 @@
         isWaitingForResponse = true;
         
         // Get user info if available
-        const email = nameInput ? nameInput.value.trim() : "";
-        const name = emailInput ? emailInput.value.trim() : "";
+        const email = emailInput ? emailInput.value.trim() : "";
+        const name = nameInput ? nameInput.value.trim() : "";
+        const whatsapp = whatsappInput ? whatsappInput.value.trim() : "";
         
         const requestData = {
             action: "sendMessage",
@@ -883,7 +830,8 @@
             chatInput: messageText,
             metadata: {
                 userId: email,
-                userName: name
+                userName: name,
+                userWhatsapp: whatsapp
             }
         };
 
