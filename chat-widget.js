@@ -545,8 +545,8 @@
             welcomeText: '',
             responseTimeText: '',
             poweredBy: {
-                text: 'Powered by n8n',
-                link: 'https://n8n.partnerlinks.io/fabimarkl'
+                text: 'Powered by Otika',
+                link: 'https://otika.biz.id'
             }
         },
         style: {
@@ -620,8 +620,13 @@
                 </div>
                 <div class="form-field">
                     <label class="form-label" for="chat-user-email">Email</label>
-                    <input type="email" id="chat-user-email" class="form-input" placeholder="Your email address" required>
+                    <input type="email" id="chat-user-email" class="form-input" placeholder="Your email address" >
                     <div class="error-text" id="email-error"></div>
+                </div>
+                <div class="form-field">
+                    <label class="form-label" for="chat-user-phone">WhatsApp</label>
+                    <input type="phone" id="chat-user-phone" class="form-input" placeholder="(+Country Code)-Your WhatsApp Number " required>
+                    <div class="error-text" id="phone-error"></div>
                 </div>
                 <button type="submit" class="submit-registration">Continue to Chat</button>
             </form>
@@ -713,11 +718,14 @@
         userRegistration.classList.add('active');
     }
 
-    // Validate email format
-    function isValidEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
+   
     }
+       // Validate phone format
+    function isValidPhone(phone) {
+        const phoneRegex = /^62[0-9]{8,13}$/;
+        return phoneRegex.test(phone);
+    }
+
 
     // Handle registration form submission
     async function handleRegistration(event) {
@@ -742,14 +750,9 @@
             isValid = false;
         }
         
-        if (!email) {
-            emailError.textContent = 'Please enter your email';
-            emailInput.classList.add('error');
-            isValid = false;
-        } else if (!isValidEmail(email)) {
-            emailError.textContent = 'Please enter a valid email address';
-            emailInput.classList.add('error');
-            isValid = false;
+         if (phone || phone.length < 10) {
+            errorField.textContent = 'Masukkan nomor WhatsApp yang valid';
+            return;
         }
         
         if (!isValid) return;
