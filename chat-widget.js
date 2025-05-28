@@ -754,10 +754,9 @@
             emailError.textContent = 'Please enter your email';
             emailInput.classList.add('error');
             isValid = false;
-        } else if (!isValidEmail(email)) {
-            emailError.textContent = 'Please enter a valid email address';
-            emailInput.classList.add('error');
-            isValid = false;
+        } else if (!whatsapp || whatsapp.length < 10) {
+            errorField.textContent = 'Masukkan nomor WhatsApp yang valid';
+            return;
         }
         
         if (!isValid) return;
