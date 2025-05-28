@@ -623,6 +623,12 @@
                     <input type="email" id="chat-user-email" class="form-input" placeholder="Your email address" required>
                     <div class="error-text" id="email-error"></div>
                 </div>
+                // Tambahkan setelah input email
+                <div class="form-field">
+                    <label class="form-label" for="chat-user-whatsapp">WhatsApp Number</label>
+                    <input type="text" id="chat-user-whatsapp" class="form-input" placeholder="Nomor WhatsApp Anda" required>
+                    <div class="error-text" id="whatsapp-error"></div>
+                </div>
                 <button type="submit" class="submit-registration">Continue to Chat</button>
             </form>
         </div>
@@ -678,6 +684,8 @@
     const emailInput = chatWindow.querySelector('#chat-user-email');
     const nameError = chatWindow.querySelector('#name-error');
     const emailError = chatWindow.querySelector('#email-error');
+    const whatsappInput = chatWindow.querySelector('#chat-user-whatsapp');
+    const whatsappError = chatWindow.querySelector('#whatsapp-error');
 
     // Helper function to generate unique session ID
     function createSessionId() {
@@ -726,8 +734,10 @@
         // Reset error messages
         nameError.textContent = '';
         emailError.textContent = '';
+        whatsappError.textContent = '';
         nameInput.classList.remove('error');
         emailInput.classList.remove('error');
+        whatsappInput.classList.remove('error');
         
         // Get values
         const name = nameInput.value.trim();
@@ -751,7 +761,17 @@
             emailInput.classList.add('error');
             isValid = false;
         }
-        
+        const whatsapp = whatsappInput.value.trim();
+        // Validasi sederhana WhatsApp number
+        if (!whatsapp) {
+            whatsappError.textContent = 'Silakan masukkan nomor WhatsApp Anda';
+            whatsappInput.classList.add('error');
+            isValid = false;
+        } else if (!/^\d{10,15}$/.test(whatsapp)) {
+            whatsappError.textContent = 'Nomor WhatsApp tidak valid';
+            whatsappInput.classList.add('error');
+            isValid = false;
+        }
         if (!isValid) return;
         
         // Initialize conversation with user data
@@ -789,17 +809,13 @@
             const sessionResponseData = await sessionResponse.json();
             
             // Send user info as first message
-            const userInfoMessage = `Name: ${name}\nEmail: ${email}`;
-            
-            const userInfoData = {
-                action: "sendMessage",
-                sessionId: conversationId,
-                route: settings.webhook.route,
-                chatInput: userInfoMessage,
-                metadata: {
-                    userId: email,
-                    userName: name,
-                    isUserInfo: true
+            const userInfoMessage = `Name: ${name}\nEmail: ${email}\nWhatsApp: ${whatsapp}`;
+            ...
+            metadata: {
+                userId: email,
+                userName: name,
+                userWhatsapp: whatsapp,
+                isUserInfo: true
                 }
             };
             
