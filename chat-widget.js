@@ -750,7 +750,7 @@
             isValid = false;
         }
         
-         if (!whatsapp || whatsapp.length < 10) {
+         if (phone || phone.length < 10) {
             errorField.textContent = 'Masukkan nomor WhatsApp yang valid';
             return;
         }
