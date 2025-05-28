@@ -742,6 +742,7 @@
         // Get values
         const name = nameInput.value.trim();
         const email = emailInput.value.trim();
+        const whatsapp = whatsappInput.value.trim();
         
         // Validate
         let isValid = true;
@@ -761,7 +762,7 @@
             emailInput.classList.add('error');
             isValid = false;
         }
-        const whatsapp = whatsappInput.value.trim();
+        
         // Validasi sederhana WhatsApp number
         if (!whatsapp) {
             whatsappError.textContent = 'Silakan masukkan nomor WhatsApp Anda';
