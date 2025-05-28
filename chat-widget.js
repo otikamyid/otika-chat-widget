@@ -619,11 +619,6 @@
                     <div class="error-text" id="name-error"></div>
                 </div>
                 <div class="form-field">
-                    <label class="form-label" for="chat-user-email">Email</label>
-                    <input type="email" id="chat-user-email" class="form-input" placeholder="Your email address" >
-                    <div class="error-text" id="email-error"></div>
-                </div>
-                <div class="form-field">
                     <label class="form-label" for="chat-user-phone">WhatsApp</label>
                     <input type="phone" id="chat-user-phone" class="form-input" placeholder="(+Country Code)-Your WhatsApp Number " required>
                     <div class="error-text" id="phone-error"></div>
