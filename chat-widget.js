@@ -750,11 +750,7 @@
             isValid = false;
         }
         
-        if (!email) {
-            emailError.textContent = 'Please enter your email';
-            emailInput.classList.add('error');
-            isValid = false;
-        } else if (!whatsapp || whatsapp.length < 10) {
+         if (!whatsapp || whatsapp.length < 10) {
             errorField.textContent = 'Masukkan nomor WhatsApp yang valid';
             return;
         }
