@@ -204,7 +204,12 @@
       </div>
     `;
 
+    var scriptTag = document.currentScript;
+if (scriptTag && scriptTag.parentNode) {
+    scriptTag.parentNode.insertBefore(container, scriptTag.nextSibling);
+} else {
     document.body.appendChild(container);
+}
 
     // --- Logic ---
     const messagesContainer = container.querySelector('.chat-messages');
