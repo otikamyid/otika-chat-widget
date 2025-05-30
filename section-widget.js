@@ -205,11 +205,11 @@
     `;
 
     var scriptTag = document.currentScript;
-if (scriptTag && scriptTag.parentNode) {
-    scriptTag.parentNode.insertBefore(container, scriptTag.nextSibling);
-} else {
-    document.body.appendChild(container);
-}
+    if (scriptTag && scriptTag.parentNode) {
+        scriptTag.parentNode.insertBefore(container, scriptTag.nextSibling);
+    } else {
+        document.body.appendChild(container);
+    }
 
     // --- Logic ---
     const messagesContainer = container.querySelector('.chat-messages');
@@ -233,12 +233,13 @@ if (scriptTag && scriptTag.parentNode) {
         div.innerHTML = `<span style="opacity:0.7;">Bot sedang mengetik...</span>`;
         return div;
     }
+    // Fungsi parseMessage diletakkan di sini, sebelum digunakan
     function parseMessage(text) {
-    // Bold: *text*
-    text = text.replace(/\*([^\*]+)\*/g, '<strong>$1</strong>');
-    // Italic: _text_
-    text = text.replace(/\_([^\_]+)\_/g, '<em>$1</em>');
-    return text;
+        // Bold: *text*
+        text = text.replace(/\*([^\*]+)\*/g, '<strong>$1</strong>');
+        // Italic: _text_
+        text = text.replace(/\_([^\_]+)\_/g, '<em>$1</em>');
+        return text;
     }
     function linkifyText(text) {
         const urlPattern = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
@@ -327,7 +328,7 @@ if (scriptTag && scriptTag.parentNode) {
                 const botMessage = document.createElement('div');
                 botMessage.className = 'chat-bubble bot-bubble';
                 const messageText = Array.isArray(userInfoResponseData) ? userInfoResponseData[0].output : userInfoResponseData.output;
-                botMsg.innerHTML = parseMessage(linkifyText(responseText || '...'));
+                botMessage.innerHTML = parseMessage(linkifyText(messageText || 'Halo, ada yang bisa kami bantu?'));
                 messagesContainer.appendChild(botMessage);
             } catch (err) {
                 messagesContainer.removeChild(typingIndicator);
@@ -425,7 +426,7 @@ if (scriptTag && scriptTag.parentNode) {
                 const botMsg = document.createElement('div');
                 botMsg.className = 'chat-bubble bot-bubble';
                 const responseText = Array.isArray(responseData) ? responseData[0].output : responseData.output;
-                botMsg.innerHTML = parseMessage(linkifyText(responseText || '...'));
+                botMsg.innerHTML = parseMessage(linkifyText(responseText || 'Terima kasih, pesan Anda sudah kami terima.'));
                 messagesContainer.appendChild(botMsg);
             } catch (err) {
                 messagesContainer.removeChild(typingIndicator);
