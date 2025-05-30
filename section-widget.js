@@ -1,7 +1,6 @@
 (function() {
     // 1. Ambil config dari window.ChatWidgetConfig (jika ada)
     var config = window.ChatWidgetConfig || {};
-    // 2. Default value jika belum diisi
     config.width = config.width || "100%";
     config.height = config.height || "700px";
     config.borderRadius = config.borderRadius || "32px";
@@ -207,6 +206,230 @@
 
     document.body.appendChild(container);
 
-    // [JS logic selanjutnya tetap, bisa copy dari versi sebelumnya...]
-    // ... (tidak diulang di sini untuk meringkas jawaban)
+    // --- Logic ---
+    const messagesContainer = container.querySelector('.chat-messages');
+    const registrationForm = container.querySelector('.registration-form');
+    const nameInput = container.querySelector('#chat-user-name');
+    const emailInput = container.querySelector('#chat-user-email');
+    const whatsappInput = container.querySelector('#chat-user-whatsapp');
+    const nameError = container.querySelector('#name-error');
+    const emailError = container.querySelector('#email-error');
+    const whatsappError = container.querySelector('#whatsapp-error');
+
+    let conversationId = '';
+    let isWaitingForResponse = false;
+
+    function createSessionId() {
+        return crypto.randomUUID ? crypto.randomUUID() : (Date.now() + Math.random()).toString(36);
+    }
+    function createTypingIndicator() {
+        const div = document.createElement('div');
+        div.className = 'chat-bubble bot-bubble';
+        div.innerHTML = `<span style="opacity:0.7;">Bot sedang mengetik...</span>`;
+        return div;
+    }
+    function linkifyText(text) {
+        const urlPattern = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+        return text.replace(urlPattern, url =>
+            `<a href="${url}" target="_blank" rel="noopener noreferrer" class="chat-link">${url}</a>`
+        );
+    }
+    function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+    function isValidWhatsappNumber(number) {
+        return /^(\+?\d{10,15})$/.test(number);
+    }
+
+    registrationForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        nameError.textContent = '';
+        emailError.textContent = '';
+        whatsappError.textContent = '';
+        nameInput.classList.remove('error');
+        emailInput.classList.remove('error');
+        whatsappInput.classList.remove('error');
+
+        const name = nameInput.value.trim();
+        const email = emailInput.value.trim();
+        const whatsapp = whatsappInput.value.trim();
+
+        let isValid = true;
+        if (!name) {
+            nameError.textContent = 'Nama wajib diisi';
+            nameInput.classList.add('error');
+            isValid = false;
+        }
+        if (!email) {
+            emailError.textContent = 'Email wajib diisi';
+            emailInput.classList.add('error');
+            isValid = false;
+        } else if (!isValidEmail(email)) {
+            emailError.textContent = 'Format email tidak valid';
+            emailInput.classList.add('error');
+            isValid = false;
+        }
+        if (!whatsapp) {
+            whatsappError.textContent = 'Nomor WhatsApp wajib diisi';
+            whatsappInput.classList.add('error');
+            isValid = false;
+        } else if (!isValidWhatsappNumber(whatsapp)) {
+            whatsappError.textContent = 'Nomor WhatsApp tidak valid';
+            whatsappInput.classList.add('error');
+            isValid = false;
+        }
+        if (!isValid) return;
+
+        registrationForm.style.display = 'none';
+        const typingIndicator = createTypingIndicator();
+        messagesContainer.appendChild(typingIndicator);
+
+        conversationId = createSessionId();
+
+        const webhookUrl = config.webhook.url;
+        const webhookRoute = config.webhook.route;
+
+        if (webhookUrl) {
+            try {
+                const userInfoMessage = `Name: ${name}\nEmail: ${email}\nWhatsApp: ${whatsapp}`;
+                const userInfoData = {
+                    action: "sendMessage",
+                    sessionId: conversationId,
+                    route: webhookRoute,
+                    chatInput: userInfoMessage,
+                    metadata: {
+                        userId: email,
+                        userName: name,
+                        userWhatsapp: whatsapp,
+                        isUserInfo: true
+                    }
+                };
+                const userInfoResponse = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userInfoData)
+                });
+                const userInfoResponseData = await userInfoResponse.json();
+                messagesContainer.removeChild(typingIndicator);
+
+                const botMessage = document.createElement('div');
+                botMessage.className = 'chat-bubble bot-bubble';
+                const messageText = Array.isArray(userInfoResponseData) ? userInfoResponseData[0].output : userInfoResponseData.output;
+                botMessage.innerHTML = linkifyText(messageText || 'Halo, ada yang bisa kami bantu?');
+                messagesContainer.appendChild(botMessage);
+            } catch (err) {
+                messagesContainer.removeChild(typingIndicator);
+                const errMsg = document.createElement('div');
+                errMsg.className = 'chat-bubble bot-bubble';
+                errMsg.textContent = "Server sedang sibuk. Silakan coba lagi nanti.";
+                messagesContainer.appendChild(errMsg);
+            }
+        } else {
+            messagesContainer.removeChild(typingIndicator);
+            const botMessage = document.createElement('div');
+            botMessage.className = 'chat-bubble bot-bubble';
+            botMessage.innerHTML = 'Halo, ada yang bisa kami bantu?';
+            messagesContainer.appendChild(botMessage);
+        }
+
+        showChatControls(name, email, whatsapp);
+    });
+
+    function showChatControls(name, email, whatsapp) {
+        const controls = document.createElement('div');
+        controls.className = 'chat-controls';
+        controls.innerHTML = `
+            <textarea class="chat-textarea" rows="1" placeholder="Tulis pesan..."></textarea>
+            <button class="chat-submit">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 2L11 13"></path>
+                    <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
+                </svg>
+            </button>
+        `;
+        container.querySelector('.chat-body').appendChild(controls);
+
+        const textarea = controls.querySelector('.chat-textarea');
+        const sendBtn = controls.querySelector('.chat-submit');
+
+        function autoResize() {
+            textarea.style.height = 'auto';
+            textarea.style.height = (textarea.scrollHeight > 120 ? 120 : textarea.scrollHeight) + 'px';
+        }
+        textarea.addEventListener('input', autoResize);
+
+        function submitMsg() {
+            const msg = textarea.value.trim();
+            if (!msg || isWaitingForResponse) return;
+            sendMessage(msg, name, email, whatsapp);
+            textarea.value = '';
+            textarea.style.height = 'auto';
+        }
+        sendBtn.addEventListener('click', submitMsg);
+        textarea.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); submitMsg();
+            }
+        });
+    }
+
+    async function sendMessage(messageText, name, email, whatsapp) {
+        if (isWaitingForResponse) return;
+        isWaitingForResponse = true;
+
+        const userMsg = document.createElement('div');
+        userMsg.className = 'chat-bubble user-bubble';
+        userMsg.textContent = messageText;
+        messagesContainer.appendChild(userMsg);
+
+        const typingIndicator = createTypingIndicator();
+        messagesContainer.appendChild(typingIndicator);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        const webhookUrl = config.webhook.url;
+        const webhookRoute = config.webhook.route;
+
+        if (webhookUrl) {
+            try {
+                const requestData = {
+                    action: "sendMessage",
+                    sessionId: conversationId,
+                    route: webhookRoute,
+                    chatInput: messageText,
+                    metadata: {
+                        userId: emailInput.value.trim(),
+                        userName: nameInput.value.trim(),
+                        userWhatsapp: whatsappInput.value.trim()
+                    }
+                };
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestData)
+                });
+                const responseData = await response.json();
+                messagesContainer.removeChild(typingIndicator);
+
+                const botMsg = document.createElement('div');
+                botMsg.className = 'chat-bubble bot-bubble';
+                const responseText = Array.isArray(responseData) ? responseData[0].output : responseData.output;
+                botMsg.innerHTML = linkifyText(responseText || 'Terima kasih, pesan Anda sudah kami terima.');
+                messagesContainer.appendChild(botMsg);
+            } catch (err) {
+                messagesContainer.removeChild(typingIndicator);
+                const botMsg = document.createElement('div');
+                botMsg.className = 'chat-bubble bot-bubble';
+                botMsg.textContent = "Server sedang sibuk. Silakan coba lagi nanti.";
+                messagesContainer.appendChild(botMsg);
+            }
+        } else {
+            messagesContainer.removeChild(typingIndicator);
+            const botMsg = document.createElement('div');
+            botMsg.className = 'chat-bubble bot-bubble';
+            botMsg.textContent = 'Simulasi balasan bot (webhook belum diatur).';
+            messagesContainer.appendChild(botMsg);
+        }
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        isWaitingForResponse = false;
+    }
 })();
