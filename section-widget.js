@@ -1,13 +1,11 @@
-// Otika Full Layout Chat Widget (Embed Section Version)
-// Copyright Otika
+// Otika Full Layout Chat Widget - Section Embed Version
 (function(global) {
-    function OtikaChatEmbed(options) {
-        // Default options
+    function OtikaFullChatEmbed(options) {
         const settings = {
             width: '100%',
             height: '600px',
             borderRadius: '24px',
-            parent: document.body, // Bisa diganti ke element apa saja
+            parent: document.body,
             branding: {
                 logo: '',
                 name: 'Otika Chat',
@@ -26,10 +24,19 @@
             ...options
         };
 
-        // --- STYLE ---
+        // Tambahkan font
+        if (!document.getElementById('otika-font')) {
+            const font = document.createElement('link');
+            font.rel = 'stylesheet';
+            font.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap';
+            font.id = 'otika-font';
+            document.head.appendChild(font);
+        }
+
+        // Tambahkan CSS
         const style = document.createElement('style');
         style.textContent = `
-        .otika-chat-embed {
+        .otika-chat-full-embed {
             --chat-color-primary: ${settings.style.primaryColor};
             --chat-color-secondary: ${settings.style.secondaryColor};
             --chat-color-light: #d1fae5;
@@ -41,7 +48,7 @@
             --chat-radius-lg: ${settings.borderRadius};
             font-family: 'Poppins', sans-serif;
         }
-        .otika-chat-embed {
+        .otika-chat-full-embed {
             width: ${settings.width};
             height: ${settings.height};
             border-radius: var(--chat-radius-lg);
@@ -51,8 +58,10 @@
             flex-direction: column;
             overflow: hidden;
             border: 1px solid var(--chat-color-light);
+            margin: 0 auto;
+            position: static;
         }
-        .otika-chat-embed .chat-header {
+        .otika-chat-full-embed .chat-header {
             padding: 20px;
             display: flex;
             align-items: center;
@@ -60,112 +69,112 @@
             background: linear-gradient(135deg, var(--chat-color-primary) 0%, var(--chat-color-secondary) 100%);
             color: white;
         }
-        .otika-chat-embed .chat-header-logo {
+        .otika-chat-full-embed .chat-header-logo {
             width: 40px; height: 40px; border-radius: 12px; background: #fff; object-fit: contain; padding: 5px;
         }
-        .otika-chat-embed .chat-header-title {
+        .otika-chat-full-embed .chat-header-title {
             font-size: 18px; font-weight: 700; color: white;
         }
-        .otika-chat-embed .chat-body {
+        .otika-chat-full-embed .chat-body {
             flex: 1; display: flex; flex-direction: column; min-height: 0;
         }
-        .otika-chat-embed .chat-messages {
+        .otika-chat-full-embed .chat-messages {
             flex: 1; overflow-y: auto; padding: 24px; background: #f9fafb;
             display: flex; flex-direction: column; gap: 18px;
         }
-        .otika-chat-embed .chat-bubble {
+        .otika-chat-full-embed .chat-bubble {
             padding: 16px 22px; border-radius: 16px;
             max-width: 80%; font-size: 15px; line-height: 1.7;
             position: relative; white-space: pre-line; word-break: break-word;
         }
-        .otika-chat-embed .chat-bubble.user-bubble {
+        .otika-chat-full-embed .chat-bubble.user-bubble {
             background: linear-gradient(135deg, var(--chat-color-primary) 0%, var(--chat-color-secondary) 100%);
             color: white; align-self: flex-end; border-bottom-right-radius: 8px;
         }
-        .otika-chat-embed .chat-bubble.bot-bubble {
+        .otika-chat-full-embed .chat-bubble.bot-bubble {
             background: white; color: var(--chat-color-text); align-self: flex-start;
             border-bottom-left-radius: 8px; border: 1px solid var(--chat-color-light);
         }
-        .otika-chat-embed .chat-controls {
+        .otika-chat-full-embed .chat-controls {
             display: flex; gap: 10px; padding: 18px; background: var(--chat-color-surface); border-top: 1px solid var(--chat-color-light);
         }
-        .otika-chat-embed .chat-textarea {
+        .otika-chat-full-embed .chat-textarea {
             flex: 1; padding: 14px 16px; border: 1px solid var(--chat-color-light);
             border-radius: 10px; background: var(--chat-color-surface);
             color: var(--chat-color-text); font-size: 15px; resize: none;
             font-family: inherit; min-height: 48px; max-height: 120px;
         }
-        .otika-chat-embed .chat-textarea:focus {
+        .otika-chat-full-embed .chat-textarea:focus {
             outline: none; border-color: var(--chat-color-primary);
             box-shadow: 0 0 0 3px rgba(16,185,129,0.13);
         }
-        .otika-chat-embed .chat-submit {
+        .otika-chat-full-embed .chat-submit {
             background: linear-gradient(135deg, var(--chat-color-primary) 0%, var(--chat-color-secondary) 100%);
             color: white; border: none; border-radius: 10px; width: 48px; height: 48px;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
-        .otika-chat-embed .chat-submit svg { width: 22px; height: 22px; }
-        .otika-chat-embed .chat-footer {
+        .otika-chat-full-embed .chat-submit svg { width: 22px; height: 22px; }
+        .otika-chat-full-embed .chat-footer {
             padding: 10px; text-align: center; background: var(--chat-color-surface);
             border-top: 1px solid var(--chat-color-light);
         }
-        .otika-chat-embed .chat-footer-link {
+        .otika-chat-full-embed .chat-footer-link {
             color: var(--chat-color-primary); text-decoration: none; font-size: 13px;
             opacity: 0.9; transition: 0.2s;
         }
-        .otika-chat-embed .chat-footer-link:hover { opacity: 1; }
-        .otika-chat-embed .registration-form {
+        .otika-chat-full-embed .chat-footer-link:hover { opacity: 1; }
+        .otika-chat-full-embed .registration-form {
             display: flex; flex-direction: column; gap: 14px;
             max-width: 360px; margin: 32px auto 0 auto;
         }
-        .otika-chat-embed .form-field {
+        .otika-chat-full-embed .form-field {
             display: flex; flex-direction: column; gap: 5px;
         }
-        .otika-chat-embed .form-label {
+        .otika-chat-full-embed .form-label {
             font-size: 14px; font-weight: 500; color: var(--chat-color-text);
         }
-        .otika-chat-embed .form-input {
+        .otika-chat-full-embed .form-input {
             padding: 12px 14px; border: 1px solid var(--chat-color-border);
             border-radius: 10px; font-family: inherit; font-size: 15px;
         }
-        .otika-chat-embed .form-input:focus {
+        .otika-chat-full-embed .form-input:focus {
             outline: none; border-color: var(--chat-color-primary);
             box-shadow: 0 0 0 3px rgba(16,185,129,0.13);
         }
-        .otika-chat-embed .form-input.error { border-color: #ef4444; }
-        .otika-chat-embed .error-text { font-size: 13px; color: #ef4444; }
-        .otika-chat-embed .submit-registration {
+        .otika-chat-full-embed .form-input.error { border-color: #ef4444; }
+        .otika-chat-full-embed .error-text { font-size: 13px; color: #ef4444; }
+        .otika-chat-full-embed .submit-registration {
             padding: 14px 20px; background: linear-gradient(135deg, var(--chat-color-primary) 0%, var(--chat-color-secondary) 100%);
             color: white; border: none; border-radius: 10px; cursor: pointer;
             font-size: 16px; font-weight: 600; font-family: inherit;
         }
-        .otika-chat-embed .chat-welcome-title {
+        .otika-chat-full-embed .chat-welcome-title {
             margin-top: 30px; font-size: 23px; font-weight: 700; color: var(--chat-color-text);
             text-align: center; margin-bottom: 20px;
         }
-        .otika-chat-embed .chat-response-time {
+        .otika-chat-full-embed .chat-response-time {
             font-size: 15px; color: var(--chat-color-text-light); margin: 0; text-align: center;
         }
-        .otika-chat-embed .suggested-questions {
+        .otika-chat-full-embed .suggested-questions {
             display: flex; flex-wrap: wrap; gap: 7px; margin: 18px 0; justify-content: flex-start;
         }
-        .otika-chat-embed .suggested-question-btn {
+        .otika-chat-full-embed .suggested-question-btn {
             background: #f3f4f6; border: 1px solid var(--chat-color-light);
             border-radius: 10px; padding: 8px 16px; font-size: 14px;
             color: var(--chat-color-text); cursor: pointer; transition: 0.2s;
         }
-        .otika-chat-embed .suggested-question-btn:hover {
+        .otika-chat-full-embed .suggested-question-btn:hover {
             background: var(--chat-color-light); border-color: var(--chat-color-primary);
         }
         @media (max-width: 600px) {
-            .otika-chat-embed { width: 100% !important; height: 100vh !important; border-radius: 0 !important; }
+            .otika-chat-full-embed { width: 100% !important; height: 100vh !important; border-radius: 0 !important; }
         }
         `;
         document.head.appendChild(style);
 
         // --- DOM ---
         const widget = document.createElement('div');
-        widget.className = 'otika-chat-embed';
+        widget.className = 'otika-chat-full-embed';
 
         widget.innerHTML = `
             <div class="chat-header">
@@ -299,7 +308,6 @@
             // Kirim data user ke webhook (jika ada)
             if (settings.webhook.url) {
                 try {
-                    // Bisa tambahkan sessionData jika ingin
                     const userInfoMessage = `Name: ${name}\nEmail: ${email}\nWhatsApp: ${whatsapp}`;
                     const userInfoData = {
                         action: "sendMessage",
@@ -467,5 +475,5 @@
     }
 
     // Export ke global
-    global.OtikaChatEmbed = OtikaChatEmbed;
+    global.OtikaFullChatEmbed = OtikaFullChatEmbed;
 })(window);
