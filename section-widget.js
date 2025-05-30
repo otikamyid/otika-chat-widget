@@ -233,6 +233,13 @@ if (scriptTag && scriptTag.parentNode) {
         div.innerHTML = `<span style="opacity:0.7;">Bot sedang mengetik...</span>`;
         return div;
     }
+    function parseMessage(text) {
+    // Bold: *text*
+    text = text.replace(/\*([^\*]+)\*/g, '<strong>$1</strong>');
+    // Italic: _text_
+    text = text.replace(/\_([^\_]+)\_/g, '<em>$1</em>');
+    return text;
+    }
     function linkifyText(text) {
         const urlPattern = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
         return text.replace(urlPattern, url =>
@@ -320,7 +327,7 @@ if (scriptTag && scriptTag.parentNode) {
                 const botMessage = document.createElement('div');
                 botMessage.className = 'chat-bubble bot-bubble';
                 const messageText = Array.isArray(userInfoResponseData) ? userInfoResponseData[0].output : userInfoResponseData.output;
-                botMessage.innerHTML = linkifyText(messageText || 'Halo, ada yang bisa kami bantu?');
+                botMsg.innerHTML = parseMessage(linkifyText(responseText || '...'));
                 messagesContainer.appendChild(botMessage);
             } catch (err) {
                 messagesContainer.removeChild(typingIndicator);
@@ -418,7 +425,7 @@ if (scriptTag && scriptTag.parentNode) {
                 const botMsg = document.createElement('div');
                 botMsg.className = 'chat-bubble bot-bubble';
                 const responseText = Array.isArray(responseData) ? responseData[0].output : responseData.output;
-                botMsg.innerHTML = linkifyText(responseText || 'Terima kasih, pesan Anda sudah kami terima.');
+                botMsg.innerHTML = parseMessage(linkifyText(responseText || '...'));
                 messagesContainer.appendChild(botMsg);
             } catch (err) {
                 messagesContainer.removeChild(typingIndicator);
