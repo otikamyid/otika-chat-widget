@@ -1,4 +1,4 @@
-// Interactive Chat Widget for n8n
+// Interactive Chat Widget for n8n - WITH LOCALSTORAGE HISTORY & USER DATA
 (function() {
     if (window.N8nChatWidgetLoaded) return;
     window.N8nChatWidgetLoaded = true;
@@ -9,7 +9,7 @@
     fontElement.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap';
     document.head.appendChild(fontElement);
 
-    // Apply widget styles with completely different design approach
+    // Widget Styles
     const widgetStyles = document.createElement('style');
     widgetStyles.textContent = `
         .chat-assist-widget {
@@ -464,8 +464,38 @@
         suggestedQuestions: window.ChatWidgetConfig.suggestedQuestions || defaultSettings.suggestedQuestions
     } : defaultSettings;
 
-    let conversationId = '';
-    let isWaitingForResponse = false;
+    // --- LocalStorage Helper ---
+    function saveUserToLocalStorage(user) {
+        localStorage.setItem('otika_chat_user', JSON.stringify(user));
+    }
+    function getUserFromLocalStorage() {
+        try {
+            return JSON.parse(localStorage.getItem('otika_chat_user') || 'null');
+        } catch {
+            return null;
+        }
+    }
+    function saveChatHistoryToLocalStorage(history) {
+        localStorage.setItem('otika_chat_history', JSON.stringify(history));
+    }
+    function getChatHistoryFromLocalStorage() {
+        try {
+            return JSON.parse(localStorage.getItem('otika_chat_history') || '[]');
+        } catch {
+            return [];
+        }
+    }
+    function saveSessionIdToLocalStorage(sid) {
+        localStorage.setItem('otika_chat_session_id', sid);
+    }
+    function getSessionIdFromLocalStorage() {
+        return localStorage.getItem('otika_chat_session_id');
+    }
+    function clearChatStorage() {
+        localStorage.removeItem('otika_chat_user');
+        localStorage.removeItem('otika_chat_history');
+        localStorage.removeItem('otika_chat_session_id');
+    }
 
     // Widget Root
     const widgetRoot = document.createElement('div');
@@ -534,18 +564,19 @@
             </div>
             <div class="chat-footer">
                 <a class="chat-footer-link" href="${settings.branding.poweredBy.link}" target="_blank">${settings.branding.poweredBy.text}</a>
+                <button style="float:right; background:none; border:none; color:#aaa; font-size:12px; cursor:pointer;" id="reset-chat-btn" title="Reset Chat">⟳</button>
             </div>
         </div>
     `;
 
     chatWindow.innerHTML = welcomeScreenHTML + chatInterfaceHTML;
 
-    // Buat launcher button
+    // Launcher button
     const launchButton = document.createElement('button');
     launchButton.className = `chat-launcher ${settings.style.position === 'left' ? 'left-side' : 'right-side'}`;
     launchButton.innerHTML = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"></path>
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 ..."/>
         </svg>
         <span class="chat-launcher-text">Need help?</span>
     `;
@@ -569,11 +600,17 @@
     const nameError = chatWindow.querySelector('#name-error');
     const emailError = chatWindow.querySelector('#email-error');
     const whatsappError = chatWindow.querySelector('#whatsapp-error');
+    const resetBtn = chatWindow.querySelector('#reset-chat-btn');
 
+    // --- STATE ---
+    let conversationId = getSessionIdFromLocalStorage() || '';
+    let isWaitingForResponse = false;
+    let chatHistory = getChatHistoryFromLocalStorage();
+
+    // --- Helper Functions ---
     function createSessionId() {
-        return crypto.randomUUID();
+        return crypto.randomUUID ? crypto.randomUUID() : (Date.now() + Math.random()).toString(36);
     }
-
     function createTypingIndicator() {
         const indicator = document.createElement('div');
         indicator.className = 'typing-indicator';
@@ -584,34 +621,52 @@
         `;
         return indicator;
     }
-
+    function parseMessage(text) {
+        text = text.replace(/\*([^\*]+)\*/g, '<strong>$1</strong>');
+        text = text.replace(/\_([^\_]+)\_/g, '<em>$1</em>');
+        return text;
+    }
     function linkifyText(text) {
         const urlPattern = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
         return text.replace(urlPattern, function(url) {
             return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="chat-link">${url}</a>`;
         });
     }
+    function renderHistory() {
+        messagesContainer.innerHTML = '';
+        chatHistory.forEach(item => {
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble ' + (item.role === 'user' ? 'user-bubble' : 'bot-bubble');
+            if (item.role === 'bot') {
+                bubble.innerHTML = parseMessage(linkifyText(item.text));
+            } else {
+                bubble.textContent = item.text;
+            }
+            messagesContainer.appendChild(bubble);
+        });
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
 
-    function showRegistrationForm() {
+    // --- Check user & session in localStorage ---
+    const savedUser = getUserFromLocalStorage();
+    if (savedUser && savedUser.name && savedUser.email && savedUser.whatsapp) {
+        // Skip form, show chat
         chatWelcome.style.display = 'none';
-        userRegistration.classList.add('active');
+        userRegistration.classList.remove('active');
+        chatBody.classList.add('active');
+        nameInput.value = savedUser.name;
+        emailInput.value = savedUser.email;
+        whatsappInput.value = savedUser.whatsapp;
+        if (!conversationId) {
+            conversationId = createSessionId();
+            saveSessionIdToLocalStorage(conversationId);
+        }
+        renderHistory();
     }
 
-    function isValidEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    }
-
-    // Validasi WhatsApp sederhana
-    function isValidWhatsappNumber(number) {
-        // Bisa diawali +, 10-15 digit
-        return /^(\+?\d{10,15})$/.test(number);
-    }
-
-    // Handle registration form submission
-    async function handleRegistration(event) {
+    // --- Event: Registration form ---
+    registrationForm.addEventListener('submit', async function(event) {
         event.preventDefault();
-
         nameError.textContent = '';
         emailError.textContent = '';
         whatsappError.textContent = '';
@@ -624,7 +679,6 @@
         const whatsapp = whatsappInput.value.trim();
 
         let isValid = true;
-
         if (!name) {
             nameError.textContent = 'Please enter your name';
             nameInput.classList.add('error');
@@ -634,7 +688,7 @@
             emailError.textContent = 'Please enter your email';
             emailInput.classList.add('error');
             isValid = false;
-        } else if (!isValidEmail(email)) {
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             emailError.textContent = 'Please enter a valid email address';
             emailInput.classList.add('error');
             isValid = false;
@@ -643,126 +697,41 @@
             whatsappError.textContent = 'Silakan masukkan nomor WhatsApp Anda';
             whatsappInput.classList.add('error');
             isValid = false;
-        } else if (!isValidWhatsappNumber(whatsapp)) {
+        } else if (!/^(\+?\d{10,15})$/.test(whatsapp)) {
             whatsappError.textContent = 'Nomor WhatsApp tidak valid';
             whatsappInput.classList.add('error');
             isValid = false;
         }
         if (!isValid) return;
 
-        conversationId = createSessionId();
+        // Simpan ke localStorage
+        saveUserToLocalStorage({ name, email, whatsapp });
 
-        const sessionData = [{
-            action: "loadPreviousSession",
-            sessionId: conversationId,
-            route: settings.webhook.route,
-            metadata: {
-                userId: email,
-                userName: name,
-                userWhatsapp: whatsapp
-            }
-        }];
-
-        try {
-            userRegistration.classList.remove('active');
-            chatBody.classList.add('active');
-
-            const typingIndicator = createTypingIndicator();
-            messagesContainer.appendChild(typingIndicator);
-
-            const sessionResponse = await fetch(settings.webhook.url, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(sessionData)
-            });
-            await sessionResponse.json();
-
-            const userInfoMessage = `Name: ${name}\nEmail: ${email}\nWhatsApp: ${whatsapp}`;
-            const userInfoData = {
-                action: "sendMessage",
-                sessionId: conversationId,
-                route: settings.webhook.route,
-                chatInput: userInfoMessage,
-                metadata: {
-                    userId: email,
-                    userName: name,
-                    userWhatsapp: whatsapp,
-                    isUserInfo: true
-                }
-            };
-
-            const userInfoResponse = await fetch(settings.webhook.url, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(userInfoData)
-            });
-            const userInfoResponseData = await userInfoResponse.json();
-
-            messagesContainer.removeChild(typingIndicator);
-
-            const botMessage = document.createElement('div');
-            botMessage.className = 'chat-bubble bot-bubble';
-            const messageText = Array.isArray(userInfoResponseData) ? userInfoResponseData[0].output : userInfoResponseData.output;
-            botMessage.innerHTML = linkifyText(messageText);
-            messagesContainer.appendChild(botMessage);
-
-            // Suggested questions
-            if (settings.suggestedQuestions && Array.isArray(settings.suggestedQuestions) && settings.suggestedQuestions.length > 0) {
-                const suggestedQuestionsContainer = document.createElement('div');
-                suggestedQuestionsContainer.className = 'suggested-questions';
-                settings.suggestedQuestions.forEach(question => {
-                    const questionButton = document.createElement('button');
-                    questionButton.className = 'suggested-question-btn';
-                    questionButton.textContent = question;
-                    questionButton.addEventListener('click', () => {
-                        submitMessage(question);
-                        if (suggestedQuestionsContainer.parentNode) {
-                            suggestedQuestionsContainer.parentNode.removeChild(suggestedQuestionsContainer);
-                        }
-                    });
-                    suggestedQuestionsContainer.appendChild(questionButton);
-                });
-                messagesContainer.appendChild(suggestedQuestionsContainer);
-            }
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        } catch (error) {
-            const indicator = messagesContainer.querySelector('.typing-indicator');
-            if (indicator) {
-                messagesContainer.removeChild(indicator);
-            }
-            const errorMessage = document.createElement('div');
-            errorMessage.className = 'chat-bubble bot-bubble';
-            errorMessage.textContent = "Sorry, I couldn't connect to the server. Please try again later.";
-            messagesContainer.appendChild(errorMessage);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        userRegistration.classList.remove('active');
+        chatBody.classList.add('active');
+        if (!conversationId) {
+            conversationId = createSessionId();
+            saveSessionIdToLocalStorage(conversationId);
         }
-    }
+        chatHistory = [];
+        saveChatHistoryToLocalStorage(chatHistory);
+        renderHistory();
+    });
 
-    // Send a message to the webhook
+    // --- Event: Send Message ---
     async function submitMessage(messageText) {
         if (isWaitingForResponse) return;
         isWaitingForResponse = true;
 
-        const email = emailInput ? emailInput.value.trim() : "";
-        const name = nameInput ? nameInput.value.trim() : "";
-        const whatsapp = whatsappInput ? whatsappInput.value.trim() : "";
+        const savedUser = getUserFromLocalStorage();
+        const email = savedUser?.email || "";
+        const name = savedUser?.name || "";
+        const whatsapp = savedUser?.whatsapp || "";
 
-        const requestData = {
-            action: "sendMessage",
-            sessionId: conversationId,
-            route: settings.webhook.route,
-            chatInput: messageText,
-            metadata: {
-                userId: email,
-                userName: name,
-                userWhatsapp: whatsapp
-            }
-        };
-
-        const userMessage = document.createElement('div');
-        userMessage.className = 'chat-bubble user-bubble';
-        userMessage.textContent = messageText;
-        messagesContainer.appendChild(userMessage);
+        // Tambahkan pesan user ke history
+        chatHistory.push({ role: 'user', text: messageText });
+        saveChatHistoryToLocalStorage(chatHistory);
+        renderHistory();
 
         const typingIndicator = createTypingIndicator();
         messagesContainer.appendChild(typingIndicator);
@@ -772,17 +741,26 @@
             const response = await fetch(settings.webhook.url, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(requestData)
+                body: JSON.stringify({
+                    action: "sendMessage",
+                    sessionId: conversationId,
+                    route: settings.webhook.route,
+                    chatInput: messageText,
+                    metadata: {
+                        userId: email,
+                        userName: name,
+                        userWhatsapp: whatsapp
+                    }
+                })
             });
             const responseData = await response.json();
             messagesContainer.removeChild(typingIndicator);
 
-            const botMessage = document.createElement('div');
-            botMessage.className = 'chat-bubble bot-bubble';
             const responseText = Array.isArray(responseData) ? responseData[0].output : responseData.output;
-            botMessage.innerHTML = linkifyText(responseText);
-            messagesContainer.appendChild(botMessage);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            chatHistory.push({ role: 'bot', text: responseText });
+            saveChatHistoryToLocalStorage(chatHistory);
+            renderHistory();
+
         } catch (error) {
             messagesContainer.removeChild(typingIndicator);
             const errorMessage = document.createElement('div');
@@ -795,16 +773,23 @@
         }
     }
 
-    // Auto-resize textarea
-    function autoResizeTextarea() {
-        messageTextarea.style.height = 'auto';
-        messageTextarea.style.height = (messageTextarea.scrollHeight > 120 ? 120 : messageTextarea.scrollHeight) + 'px';
+    // --- Event: Reset Chat ---
+    if (resetBtn) {
+        resetBtn.addEventListener('click', function() {
+            if (confirm('Reset chat and user data?')) {
+                clearChatStorage();
+                location.reload();
+            }
+        });
     }
 
-    // Event listeners
-    startChatButton.addEventListener('click', showRegistrationForm);
-    registrationForm.addEventListener('submit', handleRegistration);
+    // --- Event: Open registration form ---
+    startChatButton.addEventListener('click', function() {
+        chatWelcome.style.display = 'none';
+        userRegistration.classList.add('active');
+    });
 
+    // --- Event: Send message button ---
     sendButton.addEventListener('click', () => {
         const messageText = messageTextarea.value.trim();
         if (messageText && !isWaitingForResponse) {
@@ -814,9 +799,12 @@
         }
     });
 
-    messageTextarea.addEventListener('input', autoResizeTextarea);
-
-    messageTextarea.addEventListener('keypress', (event) => {
+    // --- Event: Enter for send ---
+    messageTextarea.addEventListener('input', function() {
+        messageTextarea.style.height = 'auto';
+        messageTextarea.style.height = (messageTextarea.scrollHeight > 120 ? 120 : messageTextarea.scrollHeight) + 'px';
+    });
+    messageTextarea.addEventListener('keypress', function(event) {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
             const messageText = messageTextarea.value.trim();
@@ -828,14 +816,15 @@
         }
     });
 
-    launchButton.addEventListener('click', () => {
+    launchButton.addEventListener('click', function() {
         chatWindow.classList.toggle('visible');
     });
 
     const closeButtons = chatWindow.querySelectorAll('.chat-close-btn');
     closeButtons.forEach(button => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', function() {
             chatWindow.classList.remove('visible');
         });
     });
+
 })();
